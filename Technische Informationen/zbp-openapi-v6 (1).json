@@ -1,0 +1,4533 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "OpenAPI definition",
+    "version" : "v0"
+  },
+  "servers" : [ {
+    "url" : "https://localhost:8443",
+    "description" : "ZBP-API"
+  }, {
+    "url" : "http://localhost:8080",
+    "description" : "management"
+  } ],
+  "security" : [ {
+    "bearerAuth" : [ ]
+  } ],
+  "tags" : [ {
+    "name" : "Migration V6",
+    "description" : "Migrate mailboxes and messages."
+  }, {
+    "name" : "Applications V6",
+    "description" : "Get, create or manipulate applications."
+  }, {
+    "name" : "Messages V6",
+    "description" : "Get, create or manipulate messages."
+  }, {
+    "name" : "Mailboxes V6",
+    "description" : "Create or delete mailboxes."
+  }, {
+    "name" : "Attachments V6",
+    "description" : "Download attachments."
+  } ],
+  "paths" : {
+    "/v6/migration/messages" : {
+      "put" : {
+        "tags" : [ "Migration V6" ],
+        "summary" : "Insert a message into a Mailbox",
+        "description" : "## This endpoint inserts a message into the specified mailbox.\n**Returns** an object with ids for the newly created message",
+        "operationId" : "migrateMessageV6",
+        "requestBody" : {
+          "description" : "Multipartform of a signed MigrateMessageV6DTO and attachments.\n\nFor instructions on how to calculate the content signatures, see the [PUT messages endpoint](#/Messages%20V6/putMessageV6).\n\n### curl example:\n\n```-F 'files=@sample.txt;type=text/plain;'```\n\n",
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MigrateMessageMultiPartV6Doc"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "413" : {
+            "description" : "`ZBP_413_001: Number of allowed attachments exceeded.`\n\n`ZBP_413_002: Sum of attachments size exceeded limit.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_006: Error processing request.`\n\n`ZBP_500_007: Error validating the message content.`\n\n\n\n`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The id of the created message is returned.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreateMessageResponseDTO"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "`ZBP_503_001: Error uploading to file storage.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_002: Given signature does not match with message content. Please re-sign and try again.`\n\n\n`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Missing or incomplete message in body.`\n\n`ZBP_400_002: Multipart form is malformed.`\n\n`ZBP_400_004: HTML contains forbidden tags or attributes.`\n\n`ZBP_400_005: Attachment {filename} missing in json content.`\n\n`ZBP_400_006: {field} missing for {filename} in Attachment in json content.`\n\n`ZBP_400_007: Can't find {header-name} in Header.`\n\n`ZBP_400_011: Invalid messageId.`\n\n`ZBP_400_012: Missing or incomplete message in body.`\n\n`ZBP_400_013: Unable to create Envelope / DTO object from the body, Incorrect json content.`\n\n\n`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_011: Retrieval confirmation state and timestamp values conflict.`\n\n\n`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/messages" : {
+      "get" : {
+        "tags" : [ "Messages V6" ],
+        "summary" : "List all messages for a mailbox.",
+        "description" : "## Lists all messages and supports paging.\n**Returns** a Page Object of the requested mailbox\n",
+        "operationId" : "getMessagesV6",
+        "parameters" : [ {
+          "name" : "storkQaaLevels",
+          "in" : "query",
+          "description" : "This specifies Stork-QAA-Levels.",
+          "required" : false,
+          "schema" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        }, {
+          "name" : "states",
+          "in" : "query",
+          "description" : "This specifies message states.",
+          "required" : false,
+          "schema" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "UNREAD", "READ" ]
+            }
+          }
+        }, {
+          "name" : "applicationIds",
+          "in" : "query",
+          "description" : "This specifies applicationIds messages relate to.",
+          "required" : false,
+          "schema" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }, {
+          "name" : "search",
+          "in" : "query",
+          "description" : "This specifies the terms which are searched for.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Specifies the page number of the returned page. If specified number is greater than the total number of pages, an empty page is returned. *Default : 0*",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "default" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "This specifies the page size of the returned page. *Maximum : 100*",
+          "required" : false,
+          "schema" : {
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Sorting criteria in the format: property,(asc|desc). Default sort order for a given property is ascending. When no sort criteria is given, the sort order is: ```received,descending```. Multiple sort criteria are supported.",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "default" : [ "received,DESC" ]
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The requested Page of the messages are returned.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessagePageV6DTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Messages V6" ],
+        "summary" : "Insert a message into a Mailbox",
+        "description" : "## This endpoint inserts a message into the specified mailbox.\n**Returns** an object with ids for the newly created message\n",
+        "operationId" : "putMessageV6",
+        "requestBody" : {
+          "description" : "## Multipartform of a signed CreateMessageV6DTO and attachments. (signed envelope and attachments)\n\nThe JSON part should always be first and must contain content length of the attachment in the Attachments list.\n\nThe JSON part includes two objects: the content and its corresponding ```sha512sum``` (signature):\n\n    {\n        content: \"{...}\"\n        sha512sum: \"{...}\"\n    }\n\nThe content part includes the list of attachments and their respective ```sha512sum```.\nThe signature is the ```sha512sum``` of the content part:\n\n---\n\n## Calculating the signature\n\nPrerequisite: A private key of a certificate known to the ZBP Service\n\nThe ```content``` part is a JSON object with the following structure:\n\n    {\n        \"mailboxUuid\": \"0f0407c5-7f7d-4ada-8dfe-43760d90586d\",\n        \"stork_qaa_level\": 1,\n        \"sender\": \"Bundeswahlscheinverfahren\",\n        \"title\": \"Nachrichtenbetreff vom 1.8.2023, 23:08:05\",\n        \"content\": \"Nachrichtentext vom 1.8.2023, 23:08:05\",\n        \"service\": \"Wahlschein-Service\",\n        \"retrievalConfirmationAddress\": \"info@example.com\",\n        \"replyAddress\": \"info@bund.de\",\n        \"attachments\":\n        [\n            {\n                \"filename\": \"Wahlschein.pdf\",\n                \"sha512sum\": \"f3b3ab3e6351e25b5c1...\",\n                \"contentLength\": 13264\n            }\n        ],\n        \"reference\": \"80364006\",\n        \"senderUrl\": \"https://www.bund.de\",\n        \"applicationId\": \"e8bc5ebc-56cf-4ff0-a861-f989aa1ba4a9\"\n    }\n\nThe list of ```attachements``` objects can be signed with the algorithm ```md5HexOfAttachments()```(example java code):\n\n    package org.apache.commons.codec.digest;\n\n    md5HexOfAttachments(MultipartFile multipartFile) {\n        String md5Hex = DigestUtils.sha512Hex(multipartFile.getInputStream());\n        return new CreateAttachmentDTO(multipartFile.getOriginalFilename(), md5Hex, multipartFile.getSize());\n    }\n\nThe content object including the signed attachments can be signed with the algorithm ```signMessage()``` (example java code):\n\n    package java.security;\n    package java.util;\n\n    signMessage(RSAPrivateKey PrivateKey, String message) {\n        RSAPrivateKey key = (RSAPrivateKey) certificateData.getPrivateKey();\n        Signature signature = Signature.getInstance(\"SHA512withRSA\");\n        signature.initSign(key);\n        signature.update(message.getBytes(StandardCharsets.UTF_8));\n        byte[] signed = signature.sign();\n        return Base64.getEncoder().encodeToString(signed);\n    }\n\nThe resulting request body should be a multipart form with the following structure, with escaped quotes:\n\n    {\n       \"content\": \"{\"mailboxUuid\":\"0f0407c5-7f7d-4ada-8dfe-43760d90586d\",\"stork_qaa_level\":1,\"sender\":\"Bundeswahlscheinverfahren\",\"title\":\"Nachrichtenbetreff vom 1.8.2023, 23:08:05\",\"content\":\"Nachrichtentext vom 1.8.2023, 23:08:05\",\"service\":\"Wahlschein-Service\",\"retrievalConfirmationAddress\":\"info@example.com\",\"replyAddress\":\"info@bund.de\",\"attachments\":[{\"filename\":\"Wahlschein.pdf\",\"sha512sum\":\"f3b3ab3e6351e25b5c1882bea8d37efaddc0ea72bf153bb067688f775a26810d32b54f014bf1cebc7fe93042d85b18b5b453e322d154bc55d5cc2754b0dfb4b2\",\"contentLength\":13264}],\"reference\":\"80364006\",\"senderUrl\":\"https://www.bund.de\",\"applicationId\":\"e8bc5ebc-56cf-4ff0-a861-f989aa1ba4a9\"}\",\n       \"sha512sum\": \"mrK2ar3kWk6nvrWc8CeUzdAOyHpQgy5rk8Xi/hTWH4ZiRtmQcmfB4pqKNIiQJcqVqfoXqDix1TaD2RSWYPb2De2HxeY0myD+5Go44V+kTxA9Wl1NTYLQZgOHWWJfkMDDHhRREv5537pUhL/l2RPobQBlEakwiQpzob4iXHzV1tWFOdNw6KnnMX/tou9sGFOaMjgD1HNmEmxIzFDm+gz8trBq/pfOHxMYludkGpsbeUJzFATqMP7lhGVZ0dwj6+2N/YDQe44YS+9hl1LQ6qGgWP5HOZw2XN8Z7SyMqD/Hi1D3hij9rB0GfTxeEBBWhLBIbLYrvad6SzVMeDI+U9LIAZVNiOYJDAlJNspKldHZt5Kda9Wm46WRteNl1Di7kpTbaHA/9ONFX/qGrr4WdaEPghpGhPm9SSNbmfx5FyyDXWYSw6DiDg80ZouA39jp2rBluXB4kjmQ2psjm4BCQ6LKd9yipEj3x72HYmKsC8ueqpyWuceu9DBitARFsw/wvl3HJb9NfV35s1vM0JkJLHHsH1CUifbrJR14UZonAYRRZEAZAumstSw/bCcQ20MWCqcZ9njBDhmqJdxrYMtGIeyn+ElMaWNXS2q6gnCnbvaskoK/GMJjPpGWUwp89KD13DjEdXoej0PLfUKS7NjW9wceZxT4o1wBjYRMY4yxhNKUCS8=\"\n    }\n\n### curl example:\n\n```-F 'json={....}'```\n```-F 'files=@sample.txt;type=text/plain'```\n\n",
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateMessageMultiPartV6Doc"
+              },
+              "encoding" : {
+                "files" : {
+                  "contentType" : "application/octet-stream"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "413" : {
+            "description" : "`ZBP_413_001: Number of allowed attachments exceeded.`\n\n`ZBP_413_002: Sum of attachments size exceeded limit.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Missing or incomplete message in body.`\n\n`ZBP_400_002: Multipart form is malformed.`\n\n`ZBP_400_004: HTML contains forbidden tags or attributes.`\n\n`ZBP_400_005: Attachment {filename} missing in json content.`\n\n`ZBP_400_006: {field} missing for {filename} in Attachment in json content.`\n\n`ZBP_400_007: Can't find {header-name} in Header.`\n\n`ZBP_400_012: Missing or incomplete message in body.`\n\n`ZBP_400_013: Unable to create Envelope / DTO object from the body, Incorrect json content.`\n\n`ZBP_400_014: Message content is too long, allowed max length: {maxLength}.`\n\n\n`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_006: Can't find this application.`\n\n\n`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The id of the created message is returned.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreateMessageResponseDTO"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "`ZBP_503_001: Error uploading to file storage.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_002: Given signature does not match with message content. Please re-sign and try again.`\n\n\n`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_007: Invalid characters in case reference number.`\n\n`ZBP_409_008: Case reference number is too long.`\n\n\n`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_006: Error processing request.`\n\n`ZBP_500_007: Error validating the message content.`\n\n\n`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Messages V6" ],
+        "summary" : "Deleting messages.",
+        "description" : "## Deletes a message and all its content, including all attachments.\n**Returns** an empty body on 200 success.",
+        "operationId" : "deleteMessagesV6",
+        "requestBody" : {
+          "description" : "A list of messageIds\n",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeleteMessagesDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "The messages have been deleted."
+          },
+          "500" : {
+            "description" : "`ZBP_500_005: There was an error deleting the message.`\n\n\n`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_002: Can't find this attachment.`\n\n`ZBP_404_004: Can't find this message.`\n\n\n`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/messages/system" : {
+      "put" : {
+        "tags" : [ "Messages V6" ],
+        "summary" : "Insert a message into a Mailbox",
+        "description" : "## This endpoint inserts a message into the specified mailbox without notification.\n**Returns** an object with ids for the newly created message\n",
+        "operationId" : "putSystemMessageV6",
+        "requestBody" : {
+          "description" : "## Multipartform of a signed CreateMessageV6DTO and attachments. (signed envelope and attachments)\n\nFor instructions on how to calculate the content signatures, see the [PUT messages endpoint](#/Messages%20V6/putMessageV6).\n\n### curl example:\n\n```-F 'json={....}'```\n```-F 'files=@sample.txt;type=text/plain'```\n\n",
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateMessageMultiPartV6Doc"
+              },
+              "encoding" : {
+                "files" : {
+                  "contentType" : "application/octet-stream"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "413" : {
+            "description" : "`ZBP_413_001: Number of allowed attachments exceeded.`\n\n`ZBP_413_002: Sum of attachments size exceeded limit.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Missing or incomplete message in body.`\n\n`ZBP_400_002: Multipart form is malformed.`\n\n`ZBP_400_004: HTML contains forbidden tags or attributes.`\n\n`ZBP_400_005: Attachment {filename} missing in json content.`\n\n`ZBP_400_006: {field} missing for {filename} in Attachment in json content.`\n\n`ZBP_400_007: Can't find {header-name} in Header.`\n\n`ZBP_400_012: Missing or incomplete message in body.`\n\n`ZBP_400_013: Unable to create Envelope / DTO object from the body, Incorrect json content.`\n\n`ZBP_400_014: Message content is too long, allowed max length: {maxLength}.`\n\n\n`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The id of the created message is returned.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreateMessageResponseDTO"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "`ZBP_503_001: Error uploading to file storage.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_002: Given signature does not match with message content. Please re-sign and try again.`\n\n\n`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_007: Invalid characters in case reference number.`\n\n`ZBP_409_008: Case reference number is too long.`\n\n\n`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_006: Can't find this case.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_006: Error processing request.`\n\n`ZBP_500_007: Error validating the message content.`\n\n\n`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/messages/{id}/setRetrievalConfirmation" : {
+      "put" : {
+        "tags" : [ "Messages V6" ],
+        "summary" : "Sets the retrieval confirmation for the message.",
+        "description" : "## Sets the retrieval confirmation state for the message with the given id of a message to SUCCESS and stores the timestamp.\n",
+        "operationId" : "setRetrievalConfirmationV6",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "This specifies the message to access.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SetRetrievalConfirmationRequestDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "404" : {
+            "description" : "`ZBP_404_004: Can't find this message.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The retrieval confirmation for the message is stored."
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/messages/setStates" : {
+      "put" : {
+        "tags" : [ "Messages V6" ],
+        "summary" : "Sets the status of several messages.",
+        "description" : "## Sets the status of several messages to READ or UNREAD.\n",
+        "operationId" : "setMessagesStateV6",
+        "requestBody" : {
+          "description" : "A MessageStateRequestDTO object.\n",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "uniqueItems" : true,
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/SetMessageStateRequestDTO"
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "The status of the messages is changed."
+          },
+          "404" : {
+            "description" : "`ZBP_404_004: Can't find this message.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/messages/setState" : {
+      "put" : {
+        "tags" : [ "Messages V6" ],
+        "summary" : "Sets the status of a message.",
+        "description" : "## Sets the status of a message to READ or UNREAD.\n",
+        "operationId" : "setMessageStateV6",
+        "requestBody" : {
+          "description" : "A MessageStateRequestDTO object.\n",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MessageStateRequestDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "The status of the messages is changed."
+          },
+          "404" : {
+            "description" : "`ZBP_404_004: Can't find this message.`\n\n\n`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox" : {
+      "get" : {
+        "tags" : [ "Mailboxes V6" ],
+        "summary" : "Gets the mailboxHandle for a citizen.",
+        "description" : "## Gets the mailboxHandle for a citizen.\n\n## Usage:\n- If you just know the citizen ID, you can get the mailboxHandle.\n\n**Returns** the mailboxHandle of the citizen.",
+        "operationId" : "getMailboxV6",
+        "parameters" : [ {
+          "name" : "citizenId",
+          "in" : "query",
+          "description" : "The citizen id is needed to get the handle of a mailbox.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Citizen id is valid. The mailboxHandle is returned. ",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreateMailboxResponseDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_003: Can't find this mailbox.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Mailboxes V6" ],
+        "summary" : "Put a state for the list of citizen ids.",
+        "description" : "## Updates the list of citizen ids with the given state.\n\n## Usage:\n- You must specify the list of citizenId\n- You must specify the state\n",
+        "operationId" : "putMailboxStateV6",
+        "requestBody" : {
+          "description" : "contains list of citizenId and the state to be updated",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PutMailboxStateDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "The state is updated."
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Mailboxes V6" ],
+        "summary" : "Create a new mailbox for a citizen.",
+        "description" : "## Creates a new mailbox for a citizen.\n\n## Usage:\n- You can specify the mailboxHandle.\n- If you omit the mailboxHandle a random mailboxHandle will be created and returned.\n- If you specify a mailboxHandle that already exists, the existing mailbox will be returned.\n\n**Returns** the mailboxHandle of the created mailbox.",
+        "operationId" : "createMailboxV6",
+        "parameters" : [ {
+          "name" : "mailboxHandle",
+          "in" : "query",
+          "description" : "(Optional) If the mailboxHandle is omitted, a Random handle is created.\nThe mailboxHandle will be returned either way.\nThe mailboxHandle is needed to send mails to this mailbox.",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "409" : {
+            "description" : "`ZBP_409_004: User already has a mailbox with a different id.`\n\n`ZBP_409_005: An id conflict occurred.`\n\n\n`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The mailbox has been created. The mailboxHandle is returned. ",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreateMailboxResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Mailboxes V6" ],
+        "summary" : "Delete a mailbox.",
+        "description" : "## Deletes a Mailbox and all its content, including all attachments.\n\n**Returns** an empty body on 200 success.",
+        "operationId" : "deleteMailboxAsCitizenV6",
+        "responses" : {
+          "500" : {
+            "description" : "`ZBP_500_004: There was an error deleting the mailbox. Not all messages and attachments were deleted.`\n\n\n`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The mailbox has been deleted."
+          },
+          "403" : {
+            "description" : "`ZBP_403_003: Your current trust level is too low.`\n\n\n`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_002: Can't find this attachment.`\n\n`ZBP_404_004: Can't find this message.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/migration/mailbox" : {
+      "post" : {
+        "tags" : [ "Migration V6" ],
+        "summary" : "Migrate a mailbox for a citizen.",
+        "description" : "## Creates a new mailbox for a citizen as part of a migration process.\nonly creates a new mailbox for a citizen if there is no mailbox for the citizen yet.\n\n## Usage:\n- You must specify the citizenId\n- You must specify the mailboxHandle\n- If a mailbox already exists with the specified citizenId, the specified mailboxHandle must match the existing mailboxHandle\n\n**Returns** the mailboxHandle for mailbox with the specified citizenId.\n",
+        "operationId" : "migrateMailboxV6",
+        "requestBody" : {
+          "description" : "contains mailboxhandle and citizenId for the mailbox",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MigrateMailboxDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "409" : {
+            "description" : "`ZBP_409_004: User already has a mailbox with a different id.`\n\n`ZBP_409_005: An id conflict occurred.`\n\n\n`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The mailbox has been created. The mailboxHandle is returned. ",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreateMailboxResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/applications/states" : {
+      "post" : {
+        "tags" : [ "Applications V6" ],
+        "summary" : "Create a new state for an application.",
+        "description" : "## Creates a new state for an application.\n\nCreateStateEnvelopeDTO has two string fields: the ```content``` and its corresponding ```sha512sum``` (signature):\n\n\t{\n\t\tcontent: \"{...}\"\n\t\tsha512sum: \"{...}\"\n\t}\n\nThe content is a CreateStateDTO as a serialised JSON string.\nThe signature is the ```sha512sum``` of the content part:\n\n---\n\n## Calculating the signature\n\nPrerequisite: A private key of a certificate known to the ZBP Service\n\nThe ```content``` part is a JSON string of an object with the following structure:\n\n```\n{\"applicationId\": \"e8bc5ebc-56cf-4ff0-a861-f989aa1ba4a9\",\n\"status\": \"INITIATED\",\n\"publicServiceName\": {\"de\",\"string\"},\n\"statusDetails\": {\"de\",\"string\"},\n\"additionalInformation\": {\"de\",\"string\"},\n\"reference\": \"string\",\n\"senderName\": \"string\",\n\"createdDate\": \"2023-11-01T11:23:21.223Z\"}\n```\n\nThe content can be signed with the algorithm ```signMessage()``` (example java code):\n\n\tpackage java.security;\n\tpackage java.util;\n\n\tsignMessage(RSAPrivateKey PrivateKey, String message) {\n\t\tRSAPrivateKey key = (RSAPrivateKey) certificateData.getPrivateKey();\n\t\tSignature signature = Signature.getInstance(\"SHA512withRSA\");\n\t\tsignature.initSign(key);\n\t\tsignature.update(message.getBytes(StandardCharsets.UTF_8));\n\t\tbyte[] signed = signature.sign();\n\t\treturn Base64.getEncoder().encodeToString(signed);\n\t}\n\nThe resulting request body should have the following structure, with escaped quotes:\n\n```\n{\n   \"content\": \"{\"applicationId\": \"e8bc5ebc-56cf-4ff0-a861-f989aa1ba4a9\",\"status\": \"INITIATED\",\"publicServiceName\": {\"de\":\"string\"},\"statusDetails\": {\"de\":\"string\"},\"additionalInformation\": {\"de\":\"string\"},\"reference\": \"string\",\"senderName\": \"string\",\"createdDate\": \"2023-11-01T11:23:21.223Z\"}\",\n   \"sha512sum\": \"mrK2ar3kWk6nvrWc8CeUzdAOyHpQgy5rk8Xi/hTWH4ZiRtmQcmfB4pqKNIiQJcqVqfoXqDix1TaD2RSWYPb2De2HxeY0myD+5Go44V+kTxA9Wl1NTYLQZgOHWWJfkMDDHhRREv5537pUhL/l2RPobQBlEakwiQpzob4iXHzV1tWFOdNw6KnnMX/tou9sGFOaMjgD1HNmEmxIzFDm+gz8trBq/pfOHxMYludkGpsbeUJzFATqMP7lhGVZ0dwj6+2N/YDQe44YS+9hl1LQ6qGgWP5HOZw2XN8Z7SyMqD/Hi1D3hij9rB0GfTxeEBBWhLBIbLYrvad6SzVMeDI+U9LIAZVNiOYJDAlJNspKldHZt5Kda9Wm46WRteNl1Di7kpTbaHA/9ONFX/qGrr4WdaEPghpGhPm9SSNbmfx5FyyDXWYSw6DiDg80ZouA39jp2rBluXB4kjmQ2psjm4BCQ6LKd9yipEj3x72HYmKsC8ueqpyWuceu9DBitARFsw/wvl3HJb9NfV35s1vM0JkJLHHsH1CUifbrJR14UZonAYRRZEAZAumstSw/bCcQ20MWCqcZ9njBDhmqJdxrYMtGIeyn+ElMaWNXS2q6gnCnbvaskoK/GMJjPpGWUwp89KD13DjEdXoej0PLfUKS7NjW9wceZxT4o1wBjYRMY4yxhNKUCS8=\"\n}\n```\n",
+        "operationId" : "createStateV6",
+        "requestBody" : {
+          "description" : "contains all information about the state\n",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateStateEnvelopeDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "404" : {
+            "description" : "`ZBP_404_006: Can't find this application.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_009: This state transition is not allowed.`\n\n\n`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_010: Language '{language-name}' in '{dto-name}' is not supported (Supported languages: {supported-languages-list}).`\n\n\n`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The state has been created."
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/applications" : {
+      "get" : {
+        "tags" : [ "Applications V6" ],
+        "summary" : "List all Applications for a citizen.",
+        "description" : "## Lists all applications and supports paging.\n**Returns** a Page Object of applications in the requested mailbox\n",
+        "operationId" : "getApplicationsV6",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Specifies the page number of the returned page. If specified number is greater than the total number of pages, an empty page is returned. *Default : 0*",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "default" : 0
+          }
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "This specifies the statuses to be filtered.",
+          "required" : false,
+          "schema" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "INITIATED", "SUBMITTED", "RECEIVED", "PROCESSING", "ACTION_REQUIRED", "COMPLETED" ]
+            }
+          }
+        }, {
+          "name" : "search",
+          "in" : "query",
+          "description" : "This specifies the terms which are searched for.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "This specifies the page size of the returned page. *Maximum : 100*",
+          "required" : false,
+          "schema" : {
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Sorting criteria in the format: property,(asc|desc). Default sort order for a given property is ascending. When no sort criteria is given, the sort order is: ```created,DESC```. Multiple sort criteria are supported.",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "default" : [ "created,DESC" ]
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The requested Page of applications is returned.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApplicationPageDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Applications V6" ],
+        "summary" : "Create a new application for a citizen.",
+        "description" : "## Creates a new application for a citizen.\n\n**Returns** the id of the created application.",
+        "operationId" : "createApplicationV6",
+        "responses" : {
+          "200" : {
+            "description" : "The application has been created. Its id is returned.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreateApplicationResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Applications V6" ],
+        "summary" : "Delete applications for a citizen.",
+        "description" : "## Delete applications for a citizen\n\n**Returns** an empty body on 200 success.",
+        "operationId" : "deleteApplicationsV6",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeleteApplicationsDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "409" : {
+            "description" : "`ZBP_409_010: Deletion of application(s) is not allowed.\"`\n\n\n`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_006: Can't find this application.\"`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Applications has been deleted."
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Invalid request body.`\n\n`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/messages/{messageId}" : {
+      "get" : {
+        "tags" : [ "Messages V6" ],
+        "summary" : "Get message details for a messageId.",
+        "description" : "## Get message details for a messageId\n**Returns** the details of a message.\n",
+        "operationId" : "getMessageV6",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "description" : "This specifies the message to access.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "`ZBP_404_004: Can't find this message.`\n\n\n`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The requested message details are returned.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessageDetailsV6DTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/{citizenId}/unreadMessagesWithRetrievalConfirmationAddress" : {
+      "get" : {
+        "tags" : [ "Messages V6" ],
+        "summary" : "Get all unread messages that have a retrieval confirmation address.",
+        "description" : "## Get a list of objects containing information about messages that have a\nretrieval confirmation address and are in the UNREAD state.\n**Returns** a UnreadMessagesWithRetrievalConfirmationAddressDTO\n",
+        "operationId" : "getUnreadMessagesWithRetrievalConfirmationAddressV6",
+        "parameters" : [ {
+          "name" : "citizenId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A UnreadMessagesWithRetrievalConfirmationAddressDTO with a list of UnreadMessageWithRetrievalConfirmationAddress items.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UnreadMessagesWithRetrievalConfirmationAddressDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/messages/{messageId}/attachments/{attachmentId}" : {
+      "get" : {
+        "tags" : [ "Attachments V6" ],
+        "summary" : "Download an attachment.",
+        "description" : "## Download an attachment.\n**Returns** the attachment as an octet-stream\n",
+        "operationId" : "downloadAttachmentV6",
+        "parameters" : [ {
+          "name" : "attachmentId",
+          "in" : "path",
+          "description" : "This specifies the attachmentId to download.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "500" : {
+            "description" : "`ZBP_500_003: An Error occurred while streaming the attachment.`\n\n\n`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_002: Can't find this attachment.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The requested attachment is returned.",
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/messages/{messageId}/attachments" : {
+      "get" : {
+        "tags" : [ "Attachments V6" ],
+        "summary" : "Download a zip archive of all attachments.",
+        "description" : "## Download a zip archive of attachments.\n**Returns** the zip archive as an octet-stream\n",
+        "operationId" : "downloadAttachmentsZipV6",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "description" : "This specifies the messageId that include all attachments to download.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "500" : {
+            "description" : "`ZBP_500_003: An Error occurred while streaming the attachment.`\n\n\n`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_002: Can't find this attachment.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The requested archive is returned.",
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/messages/summary" : {
+      "get" : {
+        "tags" : [ "Messages V6" ],
+        "summary" : "Get a summary of the number of messages in a mailbox.",
+        "description" : "## Get a summary of the number of messages in a mailbox.\n**Returns** the number of read/unread messages per storkQaaLevel, that are currently in the mailbox.\n",
+        "operationId" : "getMessageSummaryV6",
+        "responses" : {
+          "200" : {
+            "description" : "A List of SummaryItems.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessageSummaryDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/applications/{applicationId}/states" : {
+      "get" : {
+        "tags" : [ "Applications V6" ],
+        "summary" : "Gets all states for an application.",
+        "description" : "## Gets all states for an application.\n",
+        "operationId" : "getStatesV6",
+        "parameters" : [ {
+          "name" : "applicationId",
+          "in" : "path",
+          "description" : "This specifies the application the states relate to.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "`ZBP_404_006: Can't find this application.`\n\n`ZBP_404_007: Can't find a state for this application.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The states of the application is returned.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/StateDTO"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/applications/{applicationId}/latest" : {
+      "get" : {
+        "tags" : [ "Applications V6" ],
+        "summary" : "Gets an application's latest state.",
+        "description" : "## Gets an application's latest state.\n",
+        "operationId" : "getLatestStateV6",
+        "parameters" : [ {
+          "name" : "applicationId",
+          "in" : "path",
+          "description" : "This specifies the application the latest state relates to.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "`ZBP_404_006: Can't find this application.`\n\n`ZBP_404_007: Can't find a state for this application.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The latest state of the application is returned.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StateDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/applications/summary" : {
+      "get" : {
+        "tags" : [ "Applications V6" ],
+        "summary" : "Get a summary of the number of applications for a citizen.",
+        "description" : "## Get a summary of the number of applications for a citizen.\n**Returns** the number of open/total applications per storkQaaLevel, that belong to a citizen.\n",
+        "operationId" : "getApplicationSummaryV6",
+        "responses" : {
+          "200" : {
+            "description" : "A List of ApplicationSummaryItems.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApplicationSummaryDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "`ZBP_404_003: Can't find this mailbox.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/mailbox/{citizenId}" : {
+      "delete" : {
+        "tags" : [ "Mailboxes V6" ],
+        "summary" : "Delete a mailbox.",
+        "description" : "## Deletes a Mailbox and all its content, including all attachments.\n\n**Returns** an empty body on 200 success.",
+        "operationId" : "deleteMailboxAsManagerV6",
+        "parameters" : [ {
+          "name" : "citizenId",
+          "in" : "path",
+          "description" : "This is the id of the citizen whose mailbox will be deleted.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "500" : {
+            "description" : "`ZBP_500_004: There was an error deleting the mailbox. Not all messages and attachments were deleted.`\n\n\n`ZBP_500_011: Internal server error occurred.`\n\n`ZBP_500_012: Please check logs for more information.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "The mailbox has been deleted."
+          },
+          "404" : {
+            "description" : "`ZBP_404_002: Can't find this attachment.`\n\n`ZBP_404_004: Can't find this message.`\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "`ZBP_404_003\", \"Can't find this mailbox..`\n\n`ZBP_404_003\", \"Can't find this mailbox.`\n\n\n`ZBP_403_001: Access Denied.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "`ZBP_401_001: Malformed authorization token.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "`ZBP_409_001: No trust level.`\n\n`ZBP_409_002: No subject in token.`\n\n`ZBP_409_003: Wrong trust level.`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "`ZBP_400_001: Value of the field '{field-name}' in '{dto-name}' is invalid ({reason}).`",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "errorCode" : {
+                      "type" : "string",
+                      "description" : "the machine readable error code for the current error"
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "description" : "a human readable description of the error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "MigrateMessageEnvelopeV6DTO" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "string",
+            "example" : "{\"mailboxUuid\":\"12345678-1234-1234-1234-123456789012\",\"stork_qaa_level\":0,\"messageId\":4,\"sender\":\"string\",\"title\":\"string\",\"content\":\"string\",\"service\":\"string\",\"senderUrl\":\"string\",\"reference\":\"string\",\"state\":\"READ\",\"retrievalConfirmationAddress\":\"string\",\"retrievalConfirmationTimestamp\":\"2022-03-11T13:37:42.069Z\",\"retrievalConfirmationState\":\"SUCCESS\",\"replyAddress\":\"string\",\"received\":\"2022-07-11T11:01:25.498Z\",\"firstRead\":\"2022-07-11T11:05:25.498Z\",\"applicationId\":\"12345678-1234-1234-1234-987456789321\",\"attachments\":[{\"filename\":\"string\",\"sha512sum\":\"string\",\"content-length\":\"long\"}]}"
+          },
+          "sha512sum" : {
+            "type" : "string",
+            "description" : "the signature of the above content"
+          }
+        }
+      },
+      "MigrateMessageMultiPartV6Doc" : {
+        "type" : "object",
+        "properties" : {
+          "json" : {
+            "$ref" : "#/components/schemas/MigrateMessageEnvelopeV6DTO"
+          },
+          "files" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "description" : "files to upload. Needs Content-Length header.\n\n### curl example:\n\n```-F 'files=@sample.txt;type=text/plain;'```",
+              "format" : "binary"
+            }
+          }
+        },
+        "description" : "File parts need Content-Length header.\n\n### curl example:\n\n```-F 'files=@sample.txt;type=text/plain;'```\n"
+      },
+      "ErrorResponseDTO" : {
+        "type" : "object",
+        "properties" : {
+          "errorCode" : {
+            "type" : "string",
+            "description" : "the machine readable error code for the current error"
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "a human readable description of the error"
+          }
+        }
+      },
+      "CreateMessageResponseDTO" : {
+        "type" : "object",
+        "properties" : {
+          "mailboxHandle" : {
+            "type" : "string",
+            "description" : "the uuid of the mailbox",
+            "format" : "uuid"
+          },
+          "messageId" : {
+            "type" : "integer",
+            "description" : "the long id for the message for compatibility reasons",
+            "format" : "int64"
+          },
+          "messageUuid" : {
+            "type" : "string",
+            "description" : "the uuid of the message",
+            "format" : "uuid"
+          }
+        }
+      },
+      "CreateMessageEnvelopeV6DTO" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "string",
+            "example" : "{\"mailboxUuid\":\"12345678-1234-1234-1234-123456789012\",\"stork_qaa_level\":0,\"sender\":\"string\",\"title\":\"string\",\"content\":\"string\",\"service\":\"string\",\"senderUrl\":\"string\",\"reference\":\"string\",\"retrievalConfirmationAddress\":\"string\",\"replyAddress\":\"string\",\"applicationId\":\"12345678-1234-1234-1234-987456789321\",\"attachments\":[{\"filename\":\"string\",\"sha512sum\":\"string\",\"contentLength\":\"long\"}]}"
+          },
+          "sha512sum" : {
+            "type" : "string",
+            "description" : "the signature of the above content"
+          }
+        }
+      },
+      "CreateMessageMultiPartV6Doc" : {
+        "type" : "object",
+        "properties" : {
+          "json" : {
+            "$ref" : "#/components/schemas/CreateMessageEnvelopeV6DTO"
+          },
+          "files" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "description" : "files to upload.\n\n### curl example:\n\n```-F 'files=@sample.txt;type=text/plain'```",
+              "format" : "binary"
+            }
+          }
+        },
+        "description" : "### curl example:\n```-F 'files=@sample.txt;type=text/plain;'```\n"
+      },
+      "SetRetrievalConfirmationRequestDTO" : {
+        "required" : [ "retrievalConfirmationState", "retrievalConfirmationTimestamp" ],
+        "type" : "object",
+        "properties" : {
+          "retrievalConfirmationTimestamp" : {
+            "type" : "string",
+            "description" : "The retrieval confirmation timestamp",
+            "format" : "date-time"
+          },
+          "retrievalConfirmationState" : {
+            "type" : "string",
+            "description" : "The retrieval confirmation state",
+            "enum" : [ "SUCCESS", "FAILURE" ]
+          }
+        },
+        "description" : "The retrieval confirmation timestamp and confirmation state."
+      },
+      "SetMessageStateRequestDTO" : {
+        "required" : [ "citizenId", "messageId", "state", "timestamp" ],
+        "type" : "object",
+        "properties" : {
+          "citizenId" : {
+            "type" : "string",
+            "description" : "Citizen id"
+          },
+          "messageId" : {
+            "type" : "integer",
+            "description" : "Message id to change the state",
+            "format" : "int64"
+          },
+          "state" : {
+            "type" : "string",
+            "description" : "The state of the message to be updated",
+            "enum" : [ "UNREAD", "READ" ]
+          },
+          "timestamp" : {
+            "type" : "string",
+            "description" : "Timestamp when the state was changed",
+            "format" : "date-time"
+          }
+        }
+      },
+      "MessageStateRequestDTO" : {
+        "required" : [ "messageIds", "messageState" ],
+        "type" : "object",
+        "properties" : {
+          "messageIds" : {
+            "type" : "array",
+            "description" : "A list of messageIds.",
+            "items" : {
+              "type" : "integer",
+              "description" : "A list of messageIds.",
+              "format" : "int64"
+            }
+          },
+          "messageState" : {
+            "type" : "string",
+            "description" : "The state the message.",
+            "enum" : [ "UNREAD", "READ" ]
+          }
+        },
+        "description" : "A state for a message that shall be set."
+      },
+      "PutMailboxStateDTO" : {
+        "required" : [ "citizenIds", "state" ],
+        "type" : "object",
+        "properties" : {
+          "citizenIds" : {
+            "type" : "array",
+            "description" : "This is the list of citizen ids.",
+            "items" : {
+              "type" : "string",
+              "description" : "This is the list of citizen ids."
+            }
+          },
+          "state" : {
+            "type" : "string",
+            "description" : "This is the state to be updated.",
+            "enum" : [ "ACTIVE", "INACTIVITY_BLOCKED" ]
+          }
+        },
+        "description" : "This contains the information update state of mailboxes."
+      },
+      "MigrateMailboxDTO" : {
+        "required" : [ "citizenId", "mailboxHandle" ],
+        "type" : "object",
+        "properties" : {
+          "citizenId" : {
+            "type" : "string",
+            "description" : "This is the id of the citizen."
+          },
+          "mailboxHandle" : {
+            "type" : "string",
+            "description" : "This is the handle of the mailbox.",
+            "format" : "uuid"
+          }
+        },
+        "description" : "This contains the information needed to migrate a mailbox."
+      },
+      "CreateMailboxResponseDTO" : {
+        "type" : "object",
+        "properties" : {
+          "mailboxhandle" : {
+            "type" : "string",
+            "description" : "The mailbox handle of the created mailbox.",
+            "format" : "uuid"
+          }
+        },
+        "description" : "The answer to a successfully createMailbox call."
+      },
+      "CreateStateEnvelopeDTO" : {
+        "required" : [ "content", "sha512sum" ],
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "string",
+            "example" : "{\"applicationId\": \"e8bc5ebc-56cf-4ff0-a861-f989aa1ba4a9\",\"status\": \"INITIATED\",\"publicServiceName\": {\"de\",\"string\"},\"statusDetails\": {\"de\",\"string\"},\"additionalInformation\": {\"de\",\"string\"},\"reference\": \"string\",\"senderName\": \"string\",\"createdDate\": \"2023-11-01T11:23:21.223Z\"}"
+          },
+          "sha512sum" : {
+            "type" : "string",
+            "description" : "the signature of the above content"
+          }
+        }
+      },
+      "CreateApplicationResponseDTO" : {
+        "type" : "object",
+        "properties" : {
+          "applicationId" : {
+            "title" : "Application ID (Antrags-ID)",
+            "type" : "string",
+            "description" : "ID of the application to which the status belongs to. An applicationId is unique within the context of the applicant it belongs to. The term `application` (Antrag) is used according to EU vocabulary.",
+            "format" : "uuid",
+            "example" : "c1329046-baee-47a3-ace6-a8960d813c6c"
+          }
+        }
+      },
+      "MessagePageV6DTO" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "description" : "These are the messages of the current page for the current stork qaa level.",
+            "items" : {
+              "$ref" : "#/components/schemas/MessageV6DTO"
+            }
+          },
+          "pageable" : {
+            "$ref" : "#/components/schemas/PageableDTO"
+          },
+          "sort" : {
+            "$ref" : "#/components/schemas/SortDTO"
+          },
+          "unread" : {
+            "type" : "integer",
+            "description" : "This is the number of unread messages in the current stork qaa level.",
+            "format" : "int64"
+          },
+          "storkQaaLevel" : {
+            "type" : "integer",
+            "description" : "This is the the current stork qaa level of the request.",
+            "format" : "int32"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "description" : "This is the number of total pages.",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "description" : "This is the total amount of elements.",
+            "format" : "int64"
+          },
+          "number" : {
+            "type" : "integer",
+            "description" : "This is the number of the current page.",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "description" : "This is the size of the page.",
+            "format" : "int32"
+          },
+          "numberOfElements" : {
+            "type" : "integer",
+            "description" : "This is the number of elements currently on this page.",
+            "format" : "int32"
+          },
+          "isFirst" : {
+            "type" : "boolean",
+            "description" : "This is true, if the current page is the first one."
+          },
+          "isLast" : {
+            "type" : "boolean",
+            "description" : "This is true, if  the current page is the last one."
+          },
+          "hasNext" : {
+            "type" : "boolean",
+            "description" : "This is true if there is a next page."
+          },
+          "hasPrevious" : {
+            "type" : "boolean",
+            "description" : "This is true, if there is a previous slice."
+          }
+        }
+      },
+      "MessageV6DTO" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The global identifier of this message.",
+            "format" : "uuid"
+          },
+          "messageId" : {
+            "type" : "integer",
+            "description" : "This is the internal id of this message.",
+            "format" : "int64"
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "This is the title of this message."
+          },
+          "origin" : {
+            "type" : "string",
+            "description" : "This is the origin from which this message was send."
+          },
+          "sender" : {
+            "type" : "string",
+            "description" : "This is the sender of this message."
+          },
+          "service" : {
+            "type" : "string",
+            "description" : "This is the name of the service that sent this message."
+          },
+          "numberOfAttachments" : {
+            "type" : "integer",
+            "description" : "This is the number of attachments that are attached to this message.",
+            "format" : "int32"
+          },
+          "StorkQaaLevel" : {
+            "type" : "integer",
+            "description" : "This is the trust level of this message.",
+            "format" : "int32"
+          },
+          "received" : {
+            "type" : "string",
+            "description" : "This is the date and time this message was received.",
+            "format" : "date-time"
+          },
+          "state" : {
+            "type" : "string",
+            "description" : "This is the current state of this message e.g. READ, UNREAD",
+            "enum" : [ "UNREAD", "READ" ]
+          },
+          "reference" : {
+            "type" : "string",
+            "description" : "This is the case reference of this message."
+          },
+          "applicationId" : {
+            "type" : "string",
+            "description" : "This is the id of the application related to this message.",
+            "format" : "uuid"
+          }
+        },
+        "description" : "These are the messages of the current page for the current stork qaa level."
+      },
+      "PageableDTO" : {
+        "type" : "object",
+        "properties" : {
+          "offset" : {
+            "type" : "integer",
+            "description" : "the offset to be taken according to the underlying page and page size.",
+            "format" : "int64"
+          },
+          "sort" : {
+            "$ref" : "#/components/schemas/SortDTO"
+          },
+          "pageNumber" : {
+            "type" : "integer",
+            "description" : "This is the page to be returned.",
+            "format" : "int32"
+          },
+          "pageSize" : {
+            "type" : "integer",
+            "description" : "This is the number of items that should be returned. Maximum page size is 100.",
+            "format" : "int32"
+          }
+        },
+        "description" : "This holds pagination information."
+      },
+      "SortDTO" : {
+        "type" : "object",
+        "properties" : {
+          "empty" : {
+            "type" : "boolean",
+            "description" : "If this is true this represents an empty sort."
+          },
+          "unsorted" : {
+            "type" : "boolean",
+            "description" : "If this is true this represents an unsorted sort."
+          },
+          "sorted" : {
+            "type" : "boolean",
+            "description" : "If this is true this represents a sorted sort."
+          },
+          "orders" : {
+            "type" : "array",
+            "description" : "Columns which were sorted by",
+            "items" : {
+              "type" : "string",
+              "description" : "Columns which were sorted by"
+            }
+          }
+        },
+        "description" : "This holds sort information."
+      },
+      "Attachment" : {
+        "required" : [ "fileSize", "name" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The global identifier of this attachment.",
+            "format" : "uuid"
+          },
+          "attachmentId" : {
+            "type" : "integer",
+            "description" : "The attachment identifier within the message.",
+            "format" : "int64"
+          },
+          "name" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "The file name of this attachment."
+          },
+          "fileSize" : {
+            "type" : "integer",
+            "description" : "This is the size of the file in byte.",
+            "format" : "int64"
+          },
+          "contentType" : {
+            "maxLength" : 255,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "This is the content type of the file."
+          }
+        },
+        "description" : "The Attachment entity represents an attachment."
+      },
+      "MessageDetailsV6DTO" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "storkQaaLevel" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "messageId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "sender" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "content" : {
+            "type" : "string"
+          },
+          "state" : {
+            "type" : "string",
+            "enum" : [ "UNREAD", "READ" ]
+          },
+          "received" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "service" : {
+            "type" : "string"
+          },
+          "firstRead" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "senderUrl" : {
+            "type" : "string"
+          },
+          "reference" : {
+            "type" : "string"
+          },
+          "retrievalConfirmationAddress" : {
+            "type" : "string"
+          },
+          "replyAddress" : {
+            "type" : "string"
+          },
+          "applicationId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "retrievalConfirmationTimestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "retrievalConfirmationState" : {
+            "type" : "string",
+            "enum" : [ "SUCCESS", "FAILURE" ]
+          },
+          "attachments" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Attachment"
+            }
+          },
+          "origin" : {
+            "type" : "string"
+          }
+        }
+      },
+      "UnreadMessageWithRetrievalConfirmationAddress" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The global identifier of this message.",
+            "format" : "uuid"
+          },
+          "messageId" : {
+            "type" : "integer",
+            "description" : "The internal id of this message.",
+            "format" : "int64"
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "The title of this message."
+          },
+          "received" : {
+            "type" : "string",
+            "description" : "The date and time this message was received.",
+            "format" : "date-time"
+          },
+          "retrievalConfirmationAddress" : {
+            "type" : "string",
+            "description" : "This is the address where the read confirmation is sent to."
+          }
+        },
+        "description" : "These are unread messages with a retrieval confirmation address."
+      },
+      "UnreadMessagesWithRetrievalConfirmationAddressDTO" : {
+        "type" : "object",
+        "properties" : {
+          "messages" : {
+            "type" : "array",
+            "description" : "These are unread messages with a retrieval confirmation address.",
+            "items" : {
+              "$ref" : "#/components/schemas/UnreadMessageWithRetrievalConfirmationAddress"
+            }
+          }
+        }
+      },
+      "MessageSummaryDTO" : {
+        "type" : "object",
+        "properties" : {
+          "summary" : {
+            "type" : "array",
+            "description" : "These are summary items of the messages.",
+            "items" : {
+              "$ref" : "#/components/schemas/SummaryItem"
+            }
+          }
+        }
+      },
+      "SummaryItem" : {
+        "type" : "object",
+        "properties" : {
+          "storkQaaLevel" : {
+            "type" : "integer",
+            "description" : "The trust level of the messages.",
+            "format" : "int32"
+          },
+          "state" : {
+            "type" : "string",
+            "description" : "The state of the messages e.g. READ, UNREAD.",
+            "enum" : [ "UNREAD", "READ" ]
+          },
+          "count" : {
+            "type" : "integer",
+            "description" : "The number of messages for this storkQaaLevel and state combination.",
+            "format" : "int64"
+          }
+        },
+        "description" : "This Class has the number of messages for a storkQaaLevel and state combination.\nA summary of messages is composed of these items.\n"
+      },
+      "AdditionalInformationDTO" : {
+        "required" : [ "de" ],
+        "type" : "object",
+        "properties" : {
+          "de" : {
+            "type" : "string"
+          }
+        },
+        "description" : "This is additional information of this state."
+      },
+      "PublicServiceNameDTO" : {
+        "required" : [ "de" ],
+        "type" : "object",
+        "properties" : {
+          "de" : {
+            "type" : "string"
+          }
+        },
+        "description" : "This is the service name of this state."
+      },
+      "StateDTO" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "description" : "The status of this state can either be: INITIATED, SUBMITTED, RECEIVED, PROCESSING, ACTION_REQUIRED or COMPLETED",
+            "enum" : [ "INITIATED", "SUBMITTED", "RECEIVED", "PROCESSING", "ACTION_REQUIRED", "COMPLETED" ]
+          },
+          "publicServiceName" : {
+            "$ref" : "#/components/schemas/PublicServiceNameDTO"
+          },
+          "statusDetails" : {
+            "$ref" : "#/components/schemas/StatusDetailsDTO"
+          },
+          "additionalInformation" : {
+            "$ref" : "#/components/schemas/AdditionalInformationDTO"
+          },
+          "storkQaaLevel" : {
+            "type" : "integer",
+            "description" : "This is StorkQaaLevel of the application this state belongs to.",
+            "format" : "int32"
+          },
+          "createdDate" : {
+            "type" : "string",
+            "description" : "This is the time this state was created.",
+            "format" : "date-time"
+          },
+          "origin" : {
+            "type" : "string",
+            "description" : "This is the origin from which this state was send."
+          },
+          "senderName" : {
+            "type" : "string",
+            "description" : "This is the sender of this state."
+          },
+          "reference" : {
+            "type" : "string",
+            "description" : "This is the reference number of the state."
+          },
+          "received" : {
+            "type" : "string",
+            "description" : "This is the time this state was received.",
+            "format" : "date-time"
+          }
+        }
+      },
+      "StatusDetailsDTO" : {
+        "required" : [ "de" ],
+        "type" : "object",
+        "properties" : {
+          "de" : {
+            "type" : "string"
+          }
+        },
+        "description" : "This is the status details of the state."
+      },
+      "ApplicationSummaryDTO" : {
+        "type" : "object",
+        "properties" : {
+          "summary" : {
+            "type" : "array",
+            "description" : "These are summary items of the applications.",
+            "items" : {
+              "$ref" : "#/components/schemas/ApplicationSummaryItem"
+            }
+          }
+        }
+      },
+      "ApplicationSummaryItem" : {
+        "type" : "object",
+        "properties" : {
+          "storkQaaLevel" : {
+            "type" : "integer",
+            "description" : "The trust level of the applications.",
+            "format" : "int32"
+          },
+          "open" : {
+            "type" : "integer",
+            "description" : "The number of not finished applications.",
+            "format" : "int64"
+          },
+          "total" : {
+            "type" : "integer",
+            "description" : "The total number of applications.",
+            "format" : "int64"
+          }
+        },
+        "description" : "This Class has the number of open and total applications for a storkQaaLevel.\nA summary of applications is composed of these items.\n"
+      },
+      "ApplicationDTO" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "storkQaaLevel" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "created" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updated" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "latestState" : {
+            "$ref" : "#/components/schemas/StateDTO"
+          }
+        },
+        "description" : "These are the applications of the current page for the current stork qaa level."
+      },
+      "ApplicationPageDTO" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "description" : "These are the applications of the current page for the current stork qaa level.",
+            "items" : {
+              "$ref" : "#/components/schemas/ApplicationDTO"
+            }
+          },
+          "pageable" : {
+            "$ref" : "#/components/schemas/PageableDTO"
+          },
+          "sort" : {
+            "$ref" : "#/components/schemas/SortDTO"
+          },
+          "actionRequired" : {
+            "type" : "integer",
+            "description" : "This is the number of applications in status ACTION_REQUIRED",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "description" : "This is the number of total pages.",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "description" : "This is the total amount of elements.",
+            "format" : "int64"
+          },
+          "number" : {
+            "type" : "integer",
+            "description" : "This is the number of the current page.",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "description" : "This is the size of the page.",
+            "format" : "int32"
+          },
+          "numberOfElements" : {
+            "type" : "integer",
+            "description" : "This is the number of elements currently on this page.",
+            "format" : "int32"
+          },
+          "isFirst" : {
+            "type" : "boolean",
+            "description" : "This is True, if the current page is the first one."
+          },
+          "isLast" : {
+            "type" : "boolean",
+            "description" : "This is true, if the current page is the last one."
+          },
+          "hasNext" : {
+            "type" : "boolean",
+            "description" : "This is true if there is a next page."
+          },
+          "hasPrevious" : {
+            "type" : "boolean",
+            "description" : "This is true, if there is a previous slice."
+          }
+        },
+        "description" : "This is a page of applications. It contains the applications and paging information."
+      },
+      "DeleteMessagesDTO" : {
+        "required" : [ "messageIds" ],
+        "type" : "object",
+        "properties" : {
+          "messageIds" : {
+            "type" : "array",
+            "description" : "list of message ids",
+            "items" : {
+              "type" : "integer",
+              "description" : "list of message ids",
+              "format" : "int64"
+            }
+          }
+        }
+      },
+      "DeleteApplicationsDTO" : {
+        "required" : [ "applicationIds" ],
+        "type" : "object",
+        "properties" : {
+          "applicationIds" : {
+            "type" : "array",
+            "description" : "list of application ids",
+            "items" : {
+              "type" : "string",
+              "description" : "list of application ids",
+              "format" : "uuid"
+            }
+          }
+        },
+        "description" : "Delete one or more applications"
+      },
+      "CreateMessageV6DTO" : {
+        "required" : [ "content", "mailboxUuid", "sender", "service", "title" ],
+        "type" : "object",
+        "properties" : {
+          "mailboxUuid" : {
+            "type" : "string",
+            "description" : "This is the mailbox for the message",
+            "format" : "uuid"
+          },
+          "stork_qaa_level" : {
+            "maximum" : 4,
+            "minimum" : 1,
+            "type" : "integer",
+            "description" : "This is the stork qaa level of the message.",
+            "format" : "int32"
+          },
+          "sender" : {
+            "type" : "string",
+            "description" : "This is the sender of the message."
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "This is the title of the message."
+          },
+          "content" : {
+            "type" : "string",
+            "description" : "This is the content of the message."
+          },
+          "service" : {
+            "type" : "string",
+            "description" : "This is the service of the message."
+          },
+          "senderUrl" : {
+            "type" : "string",
+            "description" : "This is the senderUrl of the message."
+          },
+          "reference" : {
+            "type" : "string",
+            "description" : "This is the case reference of the message."
+          },
+          "retrievalConfirmationAddress" : {
+            "type" : "string",
+            "description" : "This is the retrieval confirmation address of the message."
+          },
+          "replyAddress" : {
+            "type" : "string",
+            "description" : "This is the reply address of the message."
+          },
+          "applicationId" : {
+            "type" : "string",
+            "description" : "This is the id of the application related to this message.",
+            "format" : "uuid"
+          },
+          "attachments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CreateAttachmentDTO"
+            }
+          }
+        }
+      },
+      "MigrateMessageV6DTO" : {
+        "required" : [ "content", "mailboxUuid", "retrievalConfirmationState", "sender", "service", "state", "title" ],
+        "type" : "object",
+        "properties" : {
+          "mailboxUuid" : {
+            "type" : "string",
+            "description" : "This is the mailbox for the message.",
+            "format" : "uuid"
+          },
+          "stork_qaa_level" : {
+            "maximum" : 4,
+            "minimum" : 1,
+            "type" : "integer",
+            "description" : "This is the stork qaa level of the message.",
+            "format" : "int32"
+          },
+          "messageId" : {
+            "type" : "integer",
+            "description" : "This is the message ID of the message.",
+            "format" : "int64"
+          },
+          "sender" : {
+            "type" : "string",
+            "description" : "This is the sender of the message."
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "This is the title of the message."
+          },
+          "content" : {
+            "type" : "string",
+            "description" : "This is the content of the message."
+          },
+          "service" : {
+            "type" : "string",
+            "description" : "This is the service of the message."
+          },
+          "senderUrl" : {
+            "type" : "string",
+            "description" : "This is the sender url of the message."
+          },
+          "reference" : {
+            "type" : "string",
+            "description" : "This is the case reference of the message."
+          },
+          "state" : {
+            "type" : "string",
+            "description" : "This is the state of the message.",
+            "enum" : [ "UNREAD", "READ" ]
+          },
+          "replyAddress" : {
+            "type" : "string",
+            "description" : "This is the reply address of the message."
+          },
+          "applicationId" : {
+            "type" : "string",
+            "description" : "This is the id of the application related to this message.",
+            "format" : "uuid"
+          },
+          "received" : {
+            "type" : "string",
+            "description" : "This is the date and time this message was received.",
+            "format" : "date-time"
+          },
+          "firstRead" : {
+            "type" : "string",
+            "description" : "This is the date and time this message was read.",
+            "format" : "date-time"
+          },
+          "retrievalConfirmationAddress" : {
+            "type" : "string",
+            "description" : "This is the retrieval confirmation address of the message."
+          },
+          "retrievalConfirmationTimestamp" : {
+            "type" : "string",
+            "description" : "This is the retrieval confirmation timestamp.",
+            "format" : "date-time"
+          },
+          "retrievalConfirmationState" : {
+            "type" : "string",
+            "description" : "This is the retrieval confirmation state.",
+            "enum" : [ "SUCCESS", "FAILURE" ]
+          },
+          "attachments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CreateAttachmentDTO"
+            }
+          }
+        }
+      },
+      "CreateAttachmentDTO" : {
+        "type" : "object",
+        "properties" : {
+          "filename" : {
+            "type" : "string",
+            "description" : "the filename of the attachment"
+          },
+          "sha512sum" : {
+            "type" : "string",
+            "description" : "This is the sha512 checksum of the file. It will be verified on upload."
+          },
+          "contentLength" : {
+            "type" : "integer",
+            "description" : "Content length of the attachment",
+            "format" : "int64"
+          }
+        }
+      },
+      "CreateStateDTO" : {
+        "required" : [ "applicationId", "createdDate", "publicServiceName", "senderName", "status" ],
+        "type" : "object",
+        "properties" : {
+          "applicationId" : {
+            "type" : "string",
+            "description" : "This specifies the application this state relates to.",
+            "format" : "uuid"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "The status of this state can either be: INITIATED, SUBMITTED, RECEIVED, PROCESSING, ACTION_REQUIRED or COMPLETED",
+            "enum" : [ "INITIATED", "SUBMITTED", "RECEIVED", "PROCESSING", "ACTION_REQUIRED", "COMPLETED" ]
+          },
+          "publicServiceName" : {
+            "$ref" : "#/components/schemas/PublicServiceNameDTO"
+          },
+          "statusDetails" : {
+            "$ref" : "#/components/schemas/StatusDetailsDTO"
+          },
+          "additionalInformation" : {
+            "$ref" : "#/components/schemas/AdditionalInformationDTO"
+          },
+          "reference" : {
+            "type" : "string",
+            "description" : "Reference number of the state. max. length: 50"
+          },
+          "senderName" : {
+            "type" : "string",
+            "description" : "Sender of the state. max. length: 100"
+          },
+          "createdDate" : {
+            "type" : "string",
+            "description" : "The createdDate date of the state",
+            "format" : "date-time"
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "description" : "Create your token with your certificate.",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}
